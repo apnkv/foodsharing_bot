@@ -277,4 +277,4 @@ foodsharing_bot/media/
 .env
 .envs/*
 
-.idea
+.idea/*
