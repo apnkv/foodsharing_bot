@@ -276,3 +276,5 @@ foodsharing_bot/media/
 .ipython/
 .env
 .envs/*
+
+.idea
