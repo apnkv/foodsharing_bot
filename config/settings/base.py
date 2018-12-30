@@ -3,11 +3,14 @@ Base settings to build other settings files upon.
 """
 
 import environ
+import logging
 
 ROOT_DIR = environ.Path(__file__) - 3  # (foodsharing_bot/config/settings/base.py - 3 = foodsharing_bot/)
 APPS_DIR = ROOT_DIR.path('foodsharing_bot')
 
 env = environ.Env()
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=False)
 if READ_DOT_ENV_FILE:
