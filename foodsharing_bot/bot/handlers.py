@@ -133,7 +133,7 @@ def give_offer_location_name(bot: Bot, update: Update):
 
     try:
         username = update.message.from_user['username']
-    except:
+    except KeyError:
         username = None
 
     if username == '':
