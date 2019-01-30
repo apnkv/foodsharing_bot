@@ -1,10 +1,11 @@
 from telegram import Bot
 from telegram.ext import Dispatcher
 import logging
+import redis
 
 from django.conf import settings
 
-from .handlers import echo_handler
+from .handlers import conv_handler
 
 
 log = logging.getLogger('foodsharing_bot.bot')
@@ -15,11 +16,10 @@ def setup(token):
     if settings.TELEGRAM_BOT_WEBHOOK_ENABLED:
         bot.set_webhook(settings.TELEGRAM_BOT_WEBHOOK_URL)
         log.info('Bot set up.')
-    # We will provide multithreading/caching etc. manually
-    # (we'll have 4 workers anyway)
+
     dispatcher = Dispatcher(bot, None, workers=0)
 
-    dispatcher.add_handler(echo_handler)
+    dispatcher.add_handler(conv_handler)
 
     return bot, dispatcher
 

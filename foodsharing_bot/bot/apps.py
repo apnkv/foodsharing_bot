@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class BotConfig(AppConfig):
-    name = 'bot'
+    name = 'foodsharing_bot.bot'
     verbose_name = 'Bot'
