@@ -31,7 +31,7 @@ def echo(bot: Bot, update: Update):
 
 
 def action_keyboard(bot: Bot, update: Update):
-    reply_markup = ReplyKeyboardMarkup([[messages.TAKE_FOOD, messages.GIVE_FOOD]],
+    reply_markup = ReplyKeyboardMarkup([[messages.GIVE_FOOD, messages.TAKE_FOOD]],
                                        one_time_keyboard=True,
                                        resize_keyboard=True)
     bot.send_message(chat_id=update.message.chat_id,
@@ -124,14 +124,13 @@ def take_location(bot: Bot, update: Update):
     )
 
     near_offers = Offer.objects.near(lat, lng)
-    print(near_offers)
 
     if near_offers.count() > 0:
 
         keyboard = []
         for i, offer in enumerate(near_offers):
             keyboard.append([
-                tg.InlineKeyboardButton(
+                tg.KeyboardButton(
                     f'{i + 1}. {offer.item_name} ({distance(lat, lng, float(offer.lat), float(offer.lng)):.2} км)',
                     callback_data=i
                 )
@@ -140,7 +139,7 @@ def take_location(bot: Bot, update: Update):
         bot.send_message(
             chat_id,
             'Вот что я нашел:',
-            reply_markup=tg.InlineKeyboardMarkup(keyboard)
+            reply_markup=tg.ReplyKeyboardMarkup(keyboard)
         )
         return TAKE_OFFER_DETAIL
     else:
@@ -192,8 +191,6 @@ def give_offer_location_name(bot: Bot, update: Update):
 
     location_name = update.message.text
     store.hset(f'fsbot_chat_{chat_id}_offer', 'location_name', location_name)
-
-    print(update.message.from_user)
 
     try:
         username = update.message.from_user['username']

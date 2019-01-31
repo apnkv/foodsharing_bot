@@ -90,6 +90,7 @@ class Offer(TimeStampedModel):
     status = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=False, blank=False)
 
     photo = models.ImageField(upload_to='photos', verbose_name=_('photo'), null=True, blank=True)
+    telegram_photo_file_id = models.CharField(max_length=100, null=True, blank=True)
 
     comment = models.TextField(verbose_name=_('comment'), null=True, blank=True)
 
