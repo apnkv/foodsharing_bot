@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, connection
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 
@@ -15,8 +15,42 @@ class Session(models.Model):
         return f'{self.name} (User {self.telegram_user_id}, chat {self.telegram_chat_id})'
 
 
+EARTH_RADIUS = 6373.0
+
+
+class OfferQuerySet(models.QuerySet):
+
+    def unassigned(self):
+        return self.filter(status=Offer.RECEIVER_NOT_ASSIGNED)
+
+    # TODO: Install PostGIS and take advantages of spatial indexing
+    def near(self, lat, lng, max_results=100):
+        cursor = connection.cursor()
+
+        radius = 10.0
+
+        sql = """
+        SELECT id, lat, lng FROM core_offer WHERE (%f * acos(cos(radians(%f)) * cos(radians(lat)) *
+               cos(radians(lng) - radians(%f)) + sin(radians(%f)) * sin(radians(lat)))) < %f
+        LIMIT %d
+        """ % (EARTH_RADIUS, lat, lng, lat, radius, max_results)
+
+        cursor.execute(sql)
+        ids = [row[0] for row in cursor.fetchall()]
+
+        return self.filter(id__in=ids, status=Offer.RECEIVER_NOT_ASSIGNED)[:max_results]
+
+
 class OfferManager(models.Manager):
-    pass
+
+    def get_queryset(self):
+        return OfferQuerySet(self.model, using=self._db)
+
+    def unassigned(self):
+        return self.get_queryset().unassigned()
+
+    def near(self, lat, lng, max_results=100):
+        return self.get_queryset().near(lat, lng, max_results=max_results)
 
 
 class Offer(TimeStampedModel):
@@ -64,6 +98,8 @@ class Offer(TimeStampedModel):
 
     lat = models.DecimalField(verbose_name=_('latitude'), max_digits=9, decimal_places=6)
     lng = models.DecimalField(verbose_name=_('longitude'), max_digits=9, decimal_places=6)
+
+    objects = OfferManager()
 
     def __str__(self):
         return f'{self.item_name} — {self.giver.name} ({self.giver.telegram_user_id})'
